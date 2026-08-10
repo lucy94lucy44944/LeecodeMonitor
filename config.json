@@ -1,15 +1,48 @@
 {
-  "channel_type": "dingding",
-  "webhook_url": "https://oapi.dingtalk.com/robot/send?access_token=ed5117bd15d23ce4d52c77d284e6f461de874ffcd5782177da7c9cabd0d514da",
   "users": [
-    "dijia-light",
-    "huang-wei-v",
-    "nei-jin-shi"
+    {
+      "slug": "HU3783TekW",
+      "real_name": "啥子"
+    }
   ],
-  "hour": 9,
-  "minute": 0,
-  "telegram_config": {
-    "bot_token": "your bot token",
-    "chat_id": "your chat id"
+  "completion_threshold": 1,
+  "execution": {
+    "mode": "both",
+    "run_on_startup": true,
+    "schedule": {
+      "hour": 9,
+      "minute": 0,
+      "timezone": "Asia/Shanghai",
+      "interval_seconds": null,
+      "max_runs": null
+    }
+  },
+  "channels": {
+    "enabled": [
+      "feishu"
+    ],
+    "feishu": {
+      "webhook_url": "https://open.feishu.cn/open-apis/bot/v2/hook/38098b45-c86a-4862-a14f-3a4d8c1193b2",
+      "secret": "",
+      "msg_type": "text"
+    },
+    "dingding": {
+      "webhook_url": "https://oapi.dingtalk.com/robot/send?access_token=ed5117bd15d23ce4d52c77d284e6f461de874ffcd5782177da7c9cabd0d514da",
+      "secret": "",
+      "msg_type": "text"
+    },
+    "telegram": {
+      "bot_token": "your bot token",
+      "chat_id": "your chat id"
+    },
+    "wechat": {
+      "webhook_url": "",
+      "enabled": false
+    },
+    "facebook": {
+      "page_access_token": "",
+      "recipient_id": "",
+      "enabled": false
+    }
   }
 }

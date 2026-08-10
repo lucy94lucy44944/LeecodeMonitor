@@ -6,29 +6,24 @@ import requests
 from .base import BaseChannel
 
 
-class DingdingChannel(BaseChannel):
-    name = "dingding"
+class FeishuChannel(BaseChannel):
+    name = "feishu"
 
     def validate(self) -> bool:
         webhook_url = self.config.get("webhook_url", "")
         return bool(webhook_url)
 
-    def _sign(self, secret: str) -> Dict[str, str]:
+    def _sign(self, timestamp: int, secret: str) -> str:
         import base64
         import hashlib
         import hmac
-        import time
-        import urllib.parse
 
-        timestamp = str(round(time.time() * 1000))
         string_to_sign = f"{timestamp}\n{secret}"
         hmac_code = hmac.new(
-            secret.encode("utf-8"),
             string_to_sign.encode("utf-8"),
             digestmod=hashlib.sha256
         ).digest()
-        sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
-        return {"timestamp": timestamp, "sign": sign}
+        return base64.b64encode(hmac_code).decode("utf-8")
 
     def send(self, message: str) -> bool:
         if not self.validate():
@@ -39,31 +34,40 @@ class DingdingChannel(BaseChannel):
         secret = self.config.get("secret", "")
         msg_type = self.config.get("msg_type", "text")
 
-        if secret:
-            params = self._sign(secret)
-            separator = "&" if "?" in webhook_url else "?"
-            request_url = f"{webhook_url}{separator}timestamp={params['timestamp']}&sign={params['sign']}"
-        else:
-            request_url = webhook_url
-
         headers = {
             "Content-Type": "application/json; charset=utf-8"
         }
 
-        payload: Dict[str, Any] = {"msgtype": msg_type}
+        payload: Dict[str, Any] = {"msg_type": msg_type}
+
         if msg_type == "text":
-            payload["text"] = {"content": message}
+            payload["content"] = {"text": message}
+        elif msg_type == "post":
+            payload["content"] = {
+                "post": {
+                    "zh_cn": {
+                        "title": "LeetCode 每日监控",
+                        "content": [[{"tag": "text", "text": message}]]
+                    }
+                }
+            }
+
+        if secret:
+            import time
+            timestamp = int(time.time())
+            payload["timestamp"] = str(timestamp)
+            payload["sign"] = self._sign(timestamp, secret)
 
         try:
             response = requests.post(
-                url=request_url,
+                url=webhook_url,
                 headers=headers,
                 data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
                 timeout=15
             )
             result = response.json()
-            err_code = result.get("errcode", -1)
-            if err_code == 0:
+            code = result.get("code", -1)
+            if code == 0:
                 print(f"[{self.name}] 消息发送成功")
                 return True
             else:
