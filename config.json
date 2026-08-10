@@ -10,7 +10,7 @@
     "mode": "both",
     "run_on_startup": true,
     "schedule": {
-      "hour": 24,
+      "hour": 9,
       "minute": 0,
       "timezone": "Asia/Shanghai",
       "interval_seconds": null,
